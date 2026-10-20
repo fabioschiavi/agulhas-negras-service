@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agulhas Negras Service — Enxergar o que quase ninguém vê</title>
+<meta name="description" content="Centro automotivo premium para todas as marcas: proteção (PPF, ClearPlex, vitrificação), estética e performance com o padrão Agulhas Negras. São Paulo.">
+<meta name="theme-color" content="#050607">
+<!--
+  AGULHAS NEGRAS SERVICE — prévia "A luz que revela".
+  Mecânicas estudadas em getlayers.ai (Relay, Lumora, Artefakt, House, Northwall) e originkit.dev; código próprio.
+  Fotos e logo: Instagram @agulhasnegrasservice (640px, públicas). Ver docs/REFERENCIAS.md.
+-->
+<link rel="icon" href="img/logo-mask.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=4">
+<script src="js/debug.js"></script>
+</head>
+<body class="is-loading">
+
+<!-- LOADER: fotos deles dadas como cartas, anel conta a página e se dobra na águia -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-cards" id="loaderCards">
+    <img src="img/ig/p04-marcas.jpg" alt="" style="--i:0">
+    <img src="img/ig/p06-clearplex.jpg" alt="" style="--i:1">
+    <img src="img/ig/r02-bandcup.jpg" alt="" style="--i:2">
+    <img src="img/ig/p08-proposta.jpg" alt="" style="--i:3">
+    <img src="img/ig/r11-bem-vindos.jpg" alt="" style="--i:4">
+    <img src="img/ig/p12-novo-padrao.jpg" alt="" style="--i:5">
+  </div>
+  <div class="loader-center">
+    <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-arc" id="ringArc" cx="60" cy="60" r="54" pathLength="100"/></svg>
+    <img class="loader-logo" src="img/logo-mask.png" alt="">
+  </div>
+  <div class="loader-foot mono"><span>Agulhas Negras Service</span><span><b id="loaderCount">000</b> / 100</span></div>
+</div>
+
+<canvas id="stream" aria-hidden="true"></canvas>
+
+<header class="nav" id="nav">
+  <a class="brand" href="#top" aria-label="Agulhas Negras Service, início"><img src="img/logo-mask.png" alt=""><span>Agulhas Negras <em>Service</em></span></a>
+  <nav class="nav-links" aria-label="Principal">
+    <a href="#metodo">Método</a><a href="#servicos">Serviços</a><a href="#portal">Portal</a><a href="#config">Configurador</a><a href="#marcas">Marcas</a>
+  </nav>
+  <div class="nav-right">
+    <span class="chip mono" id="clock">São Paulo · 09:41</span>
+    <button class="btn btn-light btn-sm" type="button" data-modal>Agendar</button>
+    <button class="burger" id="burger" type="button" aria-label="Abrir menu" aria-expanded="false"><span></span><span></span></button>
+  </div>
+</header>
+
+<main>
+
+  <!-- 1 · HERO: feixe de luz + janela de vidro com antes/depois no cursor -->
+  <section class="hero" id="top">
+   <div class="sticky hero-sticky">
+    <canvas id="carCanvas" aria-hidden="true"></canvas>
+    <img class="car-fallback" id="carFallback" src="img/hero/d/120.webp" alt="BMW M3 preta de frente, faróis acesos, no escuro">
+    <div class="hero-intro" id="heroIntro">
+      <p class="mono">[ Agulhas Negras Service ]</p>
+      <p class="scroll-hint mono">Role para acender <i></i></p>
+    </div>
+    <div class="hero-rise" id="heroRise">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow mono" data-decode>[ HERANÇA BMW · PARA TODAS AS MARCAS ]</p>
+        <h1 class="h-display">Enxergar o que quase <em>ninguém vê.</em></h1>
+        <p class="lede" data-reveal data-wait>Proteção, estética e performance com o padrão de quem lidera a BMW há 18 anos. Agora para qualquer emblema no capô.</p>
+        <div class="cta-row" data-reveal data-wait>
+          <button class="btn btn-light" type="button" data-modal>Agendar avaliação <i class="arr"></i></button>
+          <a class="btn btn-ghost" href="#metodo">Ver o método</a>
+        </div>
+      </div>
+      <!-- leque de cartas: as fotos do loader pousam aqui -->
+      <div class="hero-stage" id="heroStage">
+        <article class="card c1" data-depth="0.6">
+          <img src="img/ig/p04-marcas.jpg" alt="Linha BMW M no box do Agulhas Negras Service">
+          <span class="card-tag mono"><i class="dot"></i> box · linha m</span>
+        </article>
+        <article class="card c2" data-depth="1">
+          <img src="img/ig/r11-bem-vindos.jpg" alt="BMW pronto para entrega sob a placa Agulhas Negras Service">
+          <span class="card-tag mono"><i class="dot live"></i> bmw · entrega hoje</span>
+          <span class="card-foot mono"><b>Agulhas Negras</b>Service · São Paulo</span>
+        </article>
+        <article class="card c3" data-depth="0.8">
+          <div class="lr" id="heroReveal">
+            <img src="img/ig/p01-detalhe-verde-antes.jpg" alt="BMW M3 verde: a pintura opaca antes e o brilho depois do polimento" data-after="img/ig/p01-detalhe-verde.jpg">
+            <canvas aria-hidden="true"></canvas>
+            <p class="reveal-hint mono">passe o cursor<br>para revelar</p>
+          </div>
+          <span class="card-tag mono">antes / depois</span>
+        </article>
+      </div>
+    </div>
+    <div class="hero-status mono" data-reveal data-wait><span>Grupo Agulhas Negras · BMW desde 1998</span><span>São Paulo · Seg–Sex · 8h às 18h</span><span>Role para revelar ↓</span></div>
+    </div>
+   </div>
+  </section>
+
+  <!-- 2 · CAPÍTULOS: palavras gigantes nos cantos sobre as fotos deles -->
+  <section class="chapters" id="metodo">
+    <div class="chapter">
+      <div class="sticky">
+        <div class="ch-frame"><img src="img/ig/p06-clearplex.jpg" alt=""></div>
+        <h2 class="ch-word ch-a">Proteção</h2>
+        <h2 class="ch-word ch-b"><em>que se vê.</em></h2>
+        <p class="ch-note mono">[ 01 · PPF · CLEARPLEX · VITRIFICAÇÃO ]</p>
+      </div>
+    </div>
+    <div class="chapter">
+      <div class="sticky">
+        <div class="ch-frame"><img src="img/ig/p08-proposta.jpg" alt=""></div>
+        <h2 class="ch-word ch-a">Estética</h2>
+        <h2 class="ch-word ch-b"><em>que se sente.</em></h2>
+        <p class="ch-note mono">[ 02 · CORREÇÃO · LAVAGEM TÉCNICA · INTERIOR ]</p>
+      </div>
+    </div>
+    <div class="chapter">
+      <div class="sticky">
+        <div class="ch-frame"><img src="img/ig/r02-bandcup.jpg" alt=""></div>
+        <h2 class="ch-word ch-a">Performance</h2>
+        <h2 class="ch-word ch-b"><em>que se ouve.</em></h2>
+        <p class="ch-note mono">[ 03 · MECÂNICA · FREIOS · PERSONALIZAÇÃO ]</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · CAMADAS: vista explodida, labels decodificando, grade acende sob o cursor -->
+  <section class="camadas" id="camadas">
+    <div class="sticky lattice" id="lattice">
+      <div class="cm-copy">
+        <p class="eyebrow mono" data-decode>[ ENGENHARIA EM CAMADAS ]</p>
+        <h2 class="h-section" data-lines>Quatro camadas.<br><em>Um padrão.</em></h2>
+        <ol class="cm-list" id="cmList">
+          <li class="on"><span class="mono">01</span><b>Correção de pintura</b><p>Descontaminação e polimento técnico. A película só entra sobre superfície perfeita.</p></li>
+          <li><span class="mono">02</span><b>PPF</b><p>Película transparente, autorregenerativa, cortada por plotter para cada peça do seu carro.</p></li>
+          <li><span class="mono">03</span><b>Vitrificação cerâmica</b><p>Camada hidrofóbica sobre o PPF e nas áreas sem película. Brilho e limpeza fácil.</p></li>
+          <li><span class="mono">04</span><b>Manutenção assistida</b><p>Revisões da proteção com lembrete no portal. A garantia fica registrada no histórico.</p></li>
+        </ol>
+      </div>
+      <div class="cm-stage" id="cmStage" aria-hidden="true">
+        <div class="cm-plate p0"><img src="img/ig/p01-detalhe-verde.jpg" alt=""><span class="cm-tag mono">01 · pintura corrigida</span></div>
+        <div class="cm-plate p1"><span class="cm-tag mono">02 · ppf</span></div>
+        <div class="cm-plate p2"><span class="cm-tag mono">03 · cerâmica</span></div>
+        <div class="cm-plate p3"><span class="cm-tag mono">04 · manutenção</span></div>
+        <div class="cm-floor"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · SERVIÇOS: linhas que enchem no hover, foto segue o cursor -->
+  <section class="servicos" id="servicos">
+    <div class="sec-head">
+      <p class="eyebrow mono" data-decode>[ SERVIÇOS ]</p>
+      <h2 class="h-section" data-lines>Tudo o que o seu carro precisa.<br><em>Em um só lugar.</em></h2>
+      <p class="sec-sub" data-reveal>Estética, proteção, manutenção e personalização, com atendimento multimarcas e atenção absoluta aos detalhes.</p>
+    </div>
+    <ul class="sv-list" id="svList"></ul>
+    <div class="hv-img" id="hvImg" aria-hidden="true"><img alt=""></div>
+  </section>
+
+  <!-- 5 · PORTAL: a OS do seu carro, ao vivo, numa janela de vidro -->
+  <section class="portal" id="portal">
+    <div class="pt-grid">
+      <div class="pt-copy">
+        <p class="eyebrow mono" data-decode>[ PORTAL DO CLIENTE ]</p>
+        <h2 class="h-section" data-lines>Seu carro,<br><em>ao vivo.</em></h2>
+        <p class="sec-sub" data-reveal>Você acompanha pelo celular. Nós cuidamos no box. Foto de cada etapa, orçamento para aprovar, entrega agendada.</p>
+        <ul class="pt-bullets" data-reveal>
+          <li><span class="mono">01</span>Vistoria 360° com fotos na entrada e na saída</li>
+          <li><span class="mono">02</span>Orçamento por item, aprovado por você antes de começar</li>
+          <li><span class="mono">03</span>Histórico, garantias e lembretes de manutenção</li>
+        </ul>
+      </div>
+      <div class="glass os" id="osGlass">
+        <div class="glass-bar mono"><span>OS 0427 · BMW M3</span><span><i class="dot live"></i> ao vivo</span></div>
+        <div class="os-body">
+          <div class="os-ring">
+            <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-arc" id="osArc" cx="60" cy="60" r="54" pathLength="100"/></svg>
+            <b id="osPct">0%</b><span class="mono">concluído</span>
+          </div>
+          <ol class="os-steps" id="osSteps">
+            <li class="done">Vistoria 360°</li><li class="now">Correção de pintura</li><li>PPF</li><li>Cura</li><li>Vitrificação</li><li>Entrega</li>
+          </ol>
+          <figure class="os-photo"><img src="img/ig/p08-proposta.jpg" alt=""><figcaption class="mono">foto de agora · 14:32</figcaption></figure>
+          <ul class="os-log mono" id="osLog" aria-live="polite"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · NÚMEROS: painel preto, count-up por scroll -->
+  <section class="numeros" id="numeros">
+    <div class="num-panel" data-reveal>
+      <p class="eyebrow mono light" data-decode>[ EM NÚMEROS ]</p>
+      <h2 class="h-section">Números que não precisamos<br><em>explicar.</em></h2>
+      <ul class="num-grid">
+        <li><b data-count="28">0</b><span>anos de Grupo Agulhas Negras na rede BMW</span></li>
+        <li><b data-count="100" data-suffix="%">0</b><span>do serviço registrado em foto no portal</span></li>
+        <li><b data-count="48">0</b><span>fotos na vistoria 360° de entrada</span></li>
+        <li><b data-count="1">0</b><span>padrão, para qualquer marca</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7 · MARCAS -->
+  <section class="marcas" id="marcas">
+    <div class="sec-head">
+      <p class="eyebrow mono" data-decode>[ TODAS AS MARCAS ]</p>
+      <h2 class="h-section" data-lines>Diferentes marcas. Diferentes histórias.<br><em>O mesmo cuidado.</em></h2>
+    </div>
+    <div class="mk-photos" data-reveal>
+      <figure><img src="img/ig/p04-marcas.jpg" alt="Linha de carros de várias marcas no centro"><figcaption class="mono">[ box · são paulo ]</figcaption></figure>
+      <figure><img src="img/ig/r05-experiencia.jpg" alt="Galpão do Agulhas Negras Service"><figcaption class="mono">[ recepção ]</figcaption></figure>
+      <figure><img src="img/ig/r02-bandcup.jpg" alt="Corvette verde no box"><figcaption class="mono">[ performance ]</figcaption></figure>
+    </div>
+    <div class="marquee"><div class="track" id="mkRow1"></div></div>
+    <div class="marquee reverse"><div class="track" id="mkRow2"></div></div>
+  </section>
+
+  <!-- 8 · CONFIGURADOR DE PROTEÇÃO -->
+  <section class="config" id="config">
+    <div class="sec-head">
+      <p class="eyebrow mono" data-decode>[ CONFIGURADOR ]</p>
+      <h2 class="h-section" data-lines>Monte sua proteção.<br><em>Veja a estimativa na hora.</em></h2>
+      <p class="sec-sub" data-reveal>Toque nas áreas do carro. A seleção vai pronta para o WhatsApp da equipe.</p>
+    </div>
+    <div class="cf-grid">
+      <div class="cf-car">
+        <svg viewBox="0 0 400 800" id="cfCar" role="group" aria-label="Vista superior do carro com áreas selecionáveis">
+          <path class="outline" d="M120 40 C80 40 60 60 55 110 L46 330 L46 560 L56 700 C60 750 90 770 130 770 L270 770 C310 770 340 750 344 700 L354 560 L354 330 L345 110 C340 60 320 40 280 40 Z"/>
+          <path class="zone" data-zone="parachoque" d="M120 40 C80 40 60 60 55 110 L345 110 C340 60 320 40 280 40 Z"><title>Para-choque dianteiro</title></path>
+          <path class="zone" data-zone="farois" d="M64 70 L124 58 L128 102 L60 110 Z M336 70 L276 58 L272 102 L340 110 Z"><title>Faróis</title></path>
+          <path class="zone" data-zone="capo" d="M84 112 L82 250 L318 250 L316 112 Z"><title>Capô</title></path>
+          <path class="zone" data-zone="paralamas" d="M55 112 L80 112 L80 330 L46 330 Z M345 112 L320 112 L320 330 L354 330 Z"><title>Para-lamas dianteiros</title></path>
+          <path class="zone" data-zone="retrovisores" d="M46 296 C30 292 20 300 20 312 C20 324 30 332 46 328 Z M354 296 C370 292 380 300 380 312 C380 324 370 332 354 328 Z"><title>Retrovisores</title></path>
+          <path class="zone" data-zone="teto" d="M82 252 L72 332 L72 560 L82 638 L318 638 L328 560 L328 332 L318 252 Z"><title>Colunas e teto</title></path>
+          <path class="zone" data-zone="portas" d="M46 332 L70 332 L70 560 L46 560 Z M354 332 L330 332 L330 560 L354 560 Z"><title>Portas e laterais</title></path>
+          <path class="zone" data-zone="traseira" d="M82 640 L72 700 C76 752 92 768 130 768 L270 768 C308 768 324 752 328 700 L318 640 Z"><title>Traseira</title></path>
+          <path class="lines" d="M92 262 L78 330 L322 330 L308 262 Z M78 470 L322 470 M88 560 L312 560"/>
+        </svg>
+        <p class="cf-legend mono"><i></i> toque para selecionar</p>
+      </div>
+      <div class="cf-panel glass-flat">
+        <div class="cf-row">
+          <p class="cf-label mono">Categoria</p>
+          <div class="seg" id="cfCat" role="radiogroup" aria-label="Categoria do carro">
+            <button type="button" data-cat="hatch" aria-checked="false">Hatch</button>
+            <button type="button" data-cat="seda" aria-checked="true" class="on">Sedã / cupê</button>
+            <button type="button" data-cat="suv" aria-checked="false">SUV</button>
+          </div>
+        </div>
+        <div class="cf-row">
+          <p class="cf-label mono">Pacotes</p>
+          <div class="cf-packs">
+            <button type="button" class="pack" data-pack="frente">Frente completa <small>-10%</small></button>
+            <button type="button" class="pack" data-pack="inteiro">Carro inteiro <small>-15%</small></button>
+            <button type="button" class="pack ghost" data-pack="limpar">Limpar</button>
+          </div>
+        </div>
+        <ul class="cf-opts" id="cfOpts" aria-label="Áreas"></ul>
+        <label class="cf-addon"><input type="checkbox" id="cfCeramica"><span><b>+ Vitrificação cerâmica</b><small>sobre toda a película</small></span><em id="cfCeramicaPreco"></em></label>
+        <div class="cf-total">
+          <p class="cf-label mono">Estimativa</p>
+          <p class="cf-sum"><b id="cfTotal">R$ 0</b><small id="cfCount">nenhuma área</small></p>
+        </div>
+        <a class="btn btn-light cf-send" id="cfSend" href="#" target="_blank" rel="noopener">Enviar pelo WhatsApp <i class="arr"></i></a>
+        <p class="cf-note mono">valores ilustrativos desta prévia · a estimativa final sai na vistoria</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · FECHAMENTO: cartão cheio na cor da luz, placa da águia -->
+  <section class="cta" id="agendar">
+    <div class="cta-card" data-reveal>
+      <div class="cta-plate"><img src="img/logo-mask.png" alt=""></div>
+      <div class="cta-copy">
+        <p class="mono">[ AGENDA ABERTA · LEVA E TRAZ EM SP E ABC ]</p>
+        <h2>Agende sua <em>avaliação.</em></h2>
+        <p>Vistoria 360° com fotos, plano claro antes de qualquer serviço e um horário que cabe no seu dia.</p>
+      </div>
+      <div class="cta-actions">
+        <button class="btn btn-dark" type="button" data-modal>Agendar agora <i class="arr"></i></button>
+        <a class="btn btn-ghost-dark" href="https://wa.me/551141228222?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20Agulhas%20Negras%20Service%20e%20quero%20agendar%20uma%20avalia%C3%A7%C3%A3o." target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="ft-grid">
+    <div class="ft-brand"><img src="img/logo-mask.png" alt=""><b>Agulhas Negras <em>Service</em></b><p>Centro automotivo premium, para todas as marcas. Proteção · Estética · Performance.</p></div>
+    <div><p class="mono">Serviços</p><a href="#servicos">PPF e ClearPlex</a><a href="#servicos">Vitrificação</a><a href="#servicos">Correção de pintura</a><a href="#servicos">Mecânica e performance</a></div>
+    <div><p class="mono">Centro</p><a href="#metodo">Método</a><a href="#portal">Portal do cliente</a><a href="#config">Configurador</a><a href="#marcas">Marcas</a></div>
+    <div><p class="mono">Contato</p><a href="https://wa.me/551141228222" target="_blank" rel="noopener">WhatsApp</a><a href="tel:+551141228222">(11) 4122-8222</a><a href="https://www.instagram.com/agulhasnegrasservice/" target="_blank" rel="noopener">Instagram</a><span>São Paulo · SP</span></div>
+  </div>
+  <div class="ft-legal mono"><span>© 2026 Agulhas Negras Service · prévia de interface</span><span>Grupo Agulhas Negras · rede BMW desde 1998</span></div>
+  <p class="ft-mark" aria-hidden="true">AGULHAS NEGRAS</p>
+</footer>
+
+<!-- MENU (celular) -->
+<div class="menu" id="menu" hidden>
+  <div class="menu-top"><span class="brand"><img src="img/logo-mask.png" alt=""><span>Agulhas Negras <em>Service</em></span></span><button class="chip mono" type="button" data-close>fechar</button></div>
+  <nav class="menu-links" aria-label="Menu">
+    <a href="#metodo"><span class="mono">01</span>Método</a><a href="#servicos"><span class="mono">02</span>Serviços</a><a href="#portal"><span class="mono">03</span>Portal</a><a href="#config"><span class="mono">04</span>Configurador</a><a href="#marcas"><span class="mono">05</span>Marcas</a><a href="#agendar" data-modal><span class="mono">06</span>Agendar</a>
+  </nav>
+  <div class="menu-foot mono"><span>São Paulo · SP</span><span>Seg–Sex · 8h às 18h</span></div>
+</div>
+
+<!-- MODAL "Agendar" -->
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mdTitle">
+  <div class="md-panel">
+    <button class="md-close" type="button" data-close aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M4 4l16 16M20 4 4 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <form>
+      <p class="mono"><i class="dot"></i> agendar avaliação</p>
+      <h2 id="mdTitle">Conte o que o seu carro <em>precisa.</em></h2>
+      <label><span class="mono">Nome</span><input name="nome" type="text" required placeholder="Seu nome" autocomplete="name"></label>
+      <label><span class="mono">Carro</span><input name="carro" type="text" required placeholder="Marca, modelo e ano"></label>
+      <label><span class="mono">Serviço</span>
+        <select name="servico" required>
+          <option value="" disabled selected>Escolha</option>
+          <option>PPF</option><option>ClearPlex</option><option>Vitrificação cerâmica</option><option>Correção de pintura</option><option>Lavagem técnica</option><option>Funilaria artesanal</option><option>Mecânica e revisão</option><option>Personalização</option><option>Ainda não sei</option>
+        </select>
+      </label>
+      <label><span class="mono">Observações</span><textarea name="obs" rows="3" placeholder="Prazo, leva e traz, dúvidas"></textarea></label>
+      <div class="md-foot"><span class="mono">abre o WhatsApp com a mensagem pronta</span><button class="btn btn-light" type="submit">Enviar <i class="arr"></i></button></div>
+    </form>
+    <div class="md-ok" hidden>
+      <img src="img/logo-mask.png" alt="">
+      <h2>Mensagem <em>pronta.</em></h2>
+      <p>Abrimos o WhatsApp com os dados preenchidos. Se não abriu, toque no botão.</p>
+      <a class="btn btn-light" href="https://wa.me/551141228222" target="_blank" rel="noopener">Abrir WhatsApp</a>
+      <button class="btn btn-ghost" type="button" data-close>Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+<script type="module" src="js/main.js?v=5"></script>
+</body>
+</html>
