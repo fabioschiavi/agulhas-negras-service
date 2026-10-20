@@ -8,7 +8,7 @@ export function createStream(canvas, { core = [0.92, 0.97, 1], sheath = [0.45, 0
   const gl = canvas.getContext("webgl2", { antialias: false, alpha: false, depth: false, powerPreference: "high-performance" });
   if (!gl) return null;
   const mobile = innerWidth < 760;
-  const N = mobile ? 12 : 20;
+  const N = mobile ? 8 : 20;
 
   const vs = `#version 300 es
   void main(){ vec2 p = vec2(gl_VertexID == 1 ? 3.0 : -1.0, gl_VertexID == 2 ? 3.0 : -1.0); gl_Position = vec4(p, 0.0, 1.0); }`;
@@ -70,7 +70,7 @@ export function createStream(canvas, { core = [0.92, 0.97, 1], sheath = [0.45, 0
   gl.uniform3fv(U.uCore, core); gl.uniform3fv(U.uSheath, sheath); gl.uniform3fv(U.uBg, bg);
 
   // glow não precisa de resolução cheia: renderiza a ~55% e o CSS estica (custo de GPU cai ~3x)
-  const DPR = mobile ? 0.5 : Math.min(devicePixelRatio || 1, 2) * 0.55;
+  const DPR = mobile ? 0.4 : Math.min(devicePixelRatio || 1, 2) * 0.55;
   let W = 0, H = 0;
   function resize() {
     W = Math.max(1, Math.round(innerWidth * DPR)); H = Math.max(1, Math.round(innerHeight * DPR));
@@ -90,7 +90,10 @@ export function createStream(canvas, { core = [0.92, 0.97, 1], sheath = [0.45, 0
 
   const t0 = performance.now();
   let running = true, paused = false;
+  let lastDraw = 0;
   function frame(now) {
+    if (mobile && now - lastDraw < 30) { if (running) requestAnimationFrame(frame); return; } // celular: 30 fps basta pra um glow lento
+    lastDraw = now;
     if (!running) return;
     requestAnimationFrame(frame);
     if (paused || cur.alpha * intro < 0.004 && tgt.alpha * introTgt < 0.004) return;

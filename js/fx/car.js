@@ -9,12 +9,15 @@ export function carScrub(canvas, { count = 179, auto = 0.3, damping = 0.14 } = {
   const mobile = () => innerWidth < 760;
   const BG = "#050607";
   let set = mobile() ? "m" : "d", frames = [], W = 0, H = 0, gen = 0;
-  let autoK = 0, scrollK = 0, cur = 0, drawn = -1, dirty = true;
+  let autoK = 0, scrollK = 0, cur = 0, drawn = -1, dirty = true, done = 0;
+  let resolveLoaded, progressCb = () => {};
+  const loaded = new Promise((r) => (resolveLoaded = r));
 
   function load(which) {
     const my = ++gen, list = new Array(count).fill(null), order = [0, count - 1];
     for (let s = 16; s >= 1; s >>= 1) for (let i = 0; i < count; i += s) if (!order.includes(i)) order.push(i);
     let next = 0;
+    done = 0;
     const pump = () => { // 6 downloads em paralelo, na ordem grossa → fina
       if (my !== gen || next >= order.length) return;
       const i = order[next++];
@@ -23,7 +26,12 @@ export function carScrub(canvas, { count = 179, auto = 0.3, damping = 0.14 } = {
       img.decode().then(() => (window.createImageBitmap ? createImageBitmap(img) : img)).then((bmp) => {
         if (my !== gen) return;
         list[i] = bmp; dirty = true;
-      }).catch(() => {}).finally(pump);
+      }).catch(() => {}).finally(() => {
+        if (my !== gen) return;
+        done++; progressCb(done / count);
+        if (done >= count) resolveLoaded();
+        pump();
+      });
     };
     for (let k = 0; k < 6; k++) pump();
     return list;
@@ -40,7 +48,8 @@ export function carScrub(canvas, { count = 179, auto = 0.3, damping = 0.14 } = {
   }
   addEventListener("resize", size);
 
-  const near = (i, dir) => { for (let d = 0; d < count; d++) { const j = i + d * dir; if (j >= 0 && j < count && frames[j]) return frames[j]; } return null; };
+  // frame carregado mais próximo, nos dois sentidos (nunca salta pra muito atrás)
+  const near = (i) => { for (let d = 0; d < count; d++) { if (frames[i + d]) return frames[i + d]; if (frames[i - d]) return frames[i - d]; } return null; };
 
   function place(img) {
     const iw = img.width, ih = img.height;
@@ -50,7 +59,7 @@ export function carScrub(canvas, { count = 179, auto = 0.3, damping = 0.14 } = {
 
   function draw() {
     const f = Math.min(count - 1, Math.max(0, cur)), i0 = Math.floor(f), t = f - i0;
-    const a = frames[i0] || near(i0, -1) || near(i0, 1);
+    const a = frames[i0] || near(i0);
     if (!a || !W) return;
     const b = t > 0.02 && i0 + 1 < count ? frames[i0 + 1] : null;
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
@@ -94,5 +103,8 @@ export function carScrub(canvas, { count = 179, auto = 0.3, damping = 0.14 } = {
     /** progresso do scroll [0..1] mapeado no trecho depois da ignição */
     scrub(k) { scrollK = auto + (1 - auto) * k; },
     get frame() { return Math.round(drawn); },
+    /** resolve quando todos os frames do conjunto atual carregaram */
+    loaded,
+    onProgress(fn) { progressCb = fn; fn(done / count); },
   };
 }

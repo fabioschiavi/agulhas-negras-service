@@ -434,3 +434,12 @@ main, .footer { position: relative; z-index: 1; }
 /* camadas próprias pra tudo que anima no scroll */
 .ch-frame, .ch-word, .cm-plate, .card, .hero-rise, #carCanvas, .marquee .track, .hv-img { backface-visibility: hidden; }
 .numeros, .marcas, .footer { contain: layout paint; } /* sem contain em seções com filhos fixed (hover da foto) ou sombras grandes */
+
+/* ---------- celular: menos trabalho de pintura nas peças que animam ---------- */
+@media (max-width: 760px) {
+  .ch-word { text-shadow: none; }
+  .ch-frame, .card, .cm-plate, .mk-photos figure { box-shadow: 0 20px 40px -24px rgba(0, 0, 0, .9); }
+  .cta-card { box-shadow: none; }
+  .btn-light { box-shadow: none; }
+  .ring-arc, .cf-car .zone.on { filter: none; }
+}

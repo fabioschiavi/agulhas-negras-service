@@ -1,8 +1,8 @@
 /* Agulhas Negras Service — "A luz que revela". Boot: loader (anel conta e vira a águia, fotos como cartas),
    Lenis, feixe de luz guiado pelo scroll, hero com liquid reveal, seções. */
-import { createStream } from "./fx/stream.js?v=3";
+import { createStream } from "./fx/stream.js?v=4";
 import { liquidReveal } from "./fx/reveal.js?v=1";
-import { carScrub } from "./fx/car.js?v=2";
+import { carScrub } from "./fx/car.js?v=3";
 import { decode, riseWords, reveals, scrollCounters, onView } from "./fx/text.js?v=1";
 import { tilt, fanTilt, initChapters, initCamadas, initServicos, initOS, initMarcas, initConfigurador, initModal, initNav } from "./sections.js?v=3";
 
@@ -12,8 +12,8 @@ scrollTo(0, 0);
 /* ---------------- scroll suave + trava ---------------- */
 let lenis = null;
 if (window.Lenis && !reduce) {
-  // desktop: wheel suavizado; toque fica nativo (inércia do sistema, como no site da Apple)
-  lenis = new window.Lenis({ lerp: 0.075, wheelMultiplier: 0.85, smoothWheel: true, syncTouch: false, anchors: true, autoRaf: false });
+  // wheel e toque pelo mesmo motor: scroll e animações andam no MESMO quadro (sem o atraso de um frame do scroll nativo)
+  lenis = new window.Lenis({ lerp: 0.075, wheelMultiplier: 0.85, smoothWheel: true, syncTouch: true, syncTouchLerp: 0.085, touchInertiaMultiplier: 28, touchMultiplier: 1.1, anchors: true, autoRaf: false });
   (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(performance.now());
 }
 const lock = () => { lenis?.stop(); document.documentElement.classList.add("locked"); };
@@ -42,20 +42,28 @@ function steerStream() {
 }
 addEventListener("scroll", steerStream, { passive: true });
 
+/* ---------------- carro (antes do loader: o loader conta o download dos frames) ---------------- */
+const carCanvas = document.getElementById("carCanvas");
+const car = carScrub(carCanvas, { count: 179, auto: 0.3 });
+let carFrac = 0;
+car.onProgress((f) => (carFrac = f));
+
 /* ---------------- loader ---------------- */
 const ready = new Promise((resolve) => {
   const loader = document.getElementById("loader"), count = document.getElementById("loaderCount"), arc = document.getElementById("ringArc");
   const cards = document.getElementById("loaderCards");
   lock();
-  const FILL = 1500, t0 = performance.now() + 250;
+  const FILL = 1500, t0 = performance.now() + 250, LIMIT = 10000;
   requestAnimationFrame(() => cards.classList.add("in"));
   const easeIO = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   (function tick(now) {
     const k = Math.min(1, Math.max(0, (now - t0) / FILL));
-    const v = Math.round(easeIO(k) * 100);
+    const late = now - t0 > LIMIT; // rede ruim: abre mesmo assim
+    const frac = late ? 1 : carFrac;
+    const v = Math.round(Math.min(easeIO(k), frac) * 100);
     count.textContent = String(v).padStart(3, "0");
     arc.style.strokeDashoffset = 100 - v;
-    if (k < 1) return requestAnimationFrame(tick);
+    if (k < 1 || frac < 1) return requestAnimationFrame(tick);
     // 100: cartas voam, anel se dobra na águia, painel sobe
     cards.classList.add("out");
     loader.classList.add("fold");
@@ -71,11 +79,9 @@ if (reduce) stream?.intro(1);
 /* ---------------- hero ---------------- */
 /* ---------------- ignição: carro vem pra câmera, texto sobe no scroll ---------------- */
 const heroSec = document.getElementById("top"), heroRise = document.getElementById("heroRise"), heroIntro = document.getElementById("heroIntro");
-const carCanvas = document.getElementById("carCanvas");
-const car = carScrub(carCanvas, { count: 179, auto: 0.3 });
 ready.then(() => car.play(1900));
 let swept = false, h1shown = false, sp = 0, lastKey = "";
-const touch = matchMedia("(hover: none)").matches;
+const touch = !lenis && matchMedia("(hover: none)").matches;
 // um loop só: lê o scroll a cada quadro; no toque (scroll nativo) suaviza o progresso aqui
 function heroFrame() {
   requestAnimationFrame(heroFrame);
