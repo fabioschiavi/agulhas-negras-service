@@ -1,8 +1,8 @@
 /* Agulhas Negras Service — "A luz que revela". Boot: loader (anel conta e vira a águia, fotos como cartas),
    Lenis, feixe de luz guiado pelo scroll, hero com liquid reveal, seções. */
-import { createStream } from "./fx/stream.js?v=2";
+import { createStream } from "./fx/stream.js?v=3";
 import { liquidReveal } from "./fx/reveal.js?v=1";
-import { carScrub } from "./fx/car.js?v=1";
+import { carScrub } from "./fx/car.js?v=2";
 import { decode, riseWords, reveals, scrollCounters, onView } from "./fx/text.js?v=1";
 import { tilt, fanTilt, initChapters, initCamadas, initServicos, initOS, initMarcas, initConfigurador, initModal, initNav } from "./sections.js?v=3";
 
@@ -12,7 +12,8 @@ scrollTo(0, 0);
 /* ---------------- scroll suave + trava ---------------- */
 let lenis = null;
 if (window.Lenis && !reduce) {
-  lenis = new window.Lenis({ lerp: 0.09, anchors: true, autoRaf: false });
+  // desktop: wheel suavizado; toque fica nativo (inércia do sistema, como no site da Apple)
+  lenis = new window.Lenis({ lerp: 0.075, wheelMultiplier: 0.85, smoothWheel: true, syncTouch: false, anchors: true, autoRaf: false });
   (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(performance.now());
 }
 const lock = () => { lenis?.stop(); document.documentElement.classList.add("locked"); };
@@ -71,26 +72,36 @@ if (reduce) stream?.intro(1);
 /* ---------------- ignição: carro vem pra câmera, texto sobe no scroll ---------------- */
 const heroSec = document.getElementById("top"), heroRise = document.getElementById("heroRise"), heroIntro = document.getElementById("heroIntro");
 const carCanvas = document.getElementById("carCanvas");
-const car = carScrub(carCanvas, { count: 120, auto: 0.3 });
+const car = carScrub(carCanvas, { count: 179, auto: 0.3 });
 ready.then(() => car.play(1900));
-let swept = false;
-function heroScroll() {
+let swept = false, h1shown = false, sp = 0, lastKey = "";
+const touch = matchMedia("(hover: none)").matches;
+// um loop só: lê o scroll a cada quadro; no toque (scroll nativo) suaviza o progresso aqui
+function heroFrame() {
+  requestAnimationFrame(heroFrame);
   const r = heroSec.getBoundingClientRect(), span = r.height - innerHeight;
-  const p = span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 0;
+  if (r.bottom < -50) return;
+  const raw = span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 0;
+  sp = touch && !reduce ? sp + (raw - sp) * 0.2 : raw;
+  if (Math.abs(raw - sp) < 0.0004) sp = raw;
+  const p = sp;
+  const key = p.toFixed(4);
+  if (key === lastKey) return;
+  lastKey = key;
   const k = (a, b) => Math.min(1, Math.max(0, (p - a) / (b - a)));
   const ez = (t) => t * t * (3 - 2 * t);
   car.scrub(k(0, 0.5));
   const rise = ez(k(0.42, 0.82));
-  heroRise.style.transform = `translateY(${(1 - rise) * 100}vh)`;
-  heroRise.style.opacity = Math.min(1, rise * 1.6);
-  heroIntro.style.opacity = 1 - k(0.02, 0.18);
-  carCanvas.style.opacity = 1 - 0.72 * ez(k(0.45, 0.85));
-  carCanvas.style.transform = `scale(${1 + 0.06 * ez(k(0.45, 1))})`;
+  heroRise.style.transform = `translate3d(0, ${((1 - rise) * 100).toFixed(3)}vh, 0)`;
+  heroRise.style.opacity = Math.min(1, rise * 1.6).toFixed(3);
+  heroIntro.style.opacity = (1 - k(0.02, 0.18)).toFixed(3);
+  const carOp = 1 - 0.72 * ez(k(0.45, 0.85));
+  carCanvas.style.opacity = carOp.toFixed(3);
+  stream?.pause(carOp > 0.995 && r.bottom > innerHeight); // carro opaco cobre a tela: feixe não precisa desenhar
+  carCanvas.style.transform = `scale(${(1 + 0.06 * ez(k(0.45, 1))).toFixed(4)})`;
+  if (rise > 0.25 && !h1shown) { h1shown = true; h1on(); }
   if (rise > 0.95 && !swept) { swept = true; reveal.sweep(1700); }
 }
-addEventListener("scroll", heroScroll, { passive: true });
-addEventListener("resize", heroScroll);
-heroScroll();
 window.__car = car;
 
 const heroStage = document.getElementById("heroStage");
@@ -98,8 +109,8 @@ const reveal = liquidReveal(document.getElementById("heroReveal"), { radius: 90 
 const h1on = riseWords(document.querySelector(".hero h1"), { stagger: 55, delay: 150 });
 // as cartas pousam em leque depois do loader (continuidade com as cartas dadas)
 heroStage.querySelectorAll(".card").forEach((c, i) => { c.style.transition = `opacity .9s var(--ease) ${120 + i * 110}ms, transform 1.1s var(--ease) ${120 + i * 110}ms`; c.style.setProperty("--dy", "80px"); });
+requestAnimationFrame(heroFrame);
 ready.then(() => {
-  h1on();
   heroStage.querySelectorAll(".card").forEach((c) => c.style.setProperty("--dy", "0px"));
   setTimeout(() => { heroStage.querySelectorAll(".card").forEach((c) => (c.style.transition = "")); fanTilt(heroStage); }, 1500);
 });

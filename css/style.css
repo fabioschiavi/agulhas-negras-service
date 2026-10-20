@@ -423,3 +423,14 @@ main, .footer { position: relative; z-index: 1; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .reveal, .rise .wi { opacity: 1; transform: none; }
 }
+
+/* ---------- desempenho: blur só na nav e no modal (cada backdrop-filter re-borra o canvas a cada quadro) ---------- */
+.chip, .nav-links, .glass, .glass-flat, .card-tag, .reveal-hint, .cm-plate.p1, .cm-tag, .mk-photos figcaption { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.chip, .nav-links { background: rgba(10, 11, 14, .82); }
+.card-tag, .cm-tag, .mk-photos figcaption, .reveal-hint { background: rgba(5, 6, 7, .78); }
+.glass { background: linear-gradient(160deg, rgba(22, 25, 30, .92), rgba(12, 14, 17, .9)); }
+.glass-flat { background: rgba(14, 16, 20, .9); }
+.nav.scrolled { background: rgba(5, 6, 7, .78); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+/* camadas próprias pra tudo que anima no scroll */
+.ch-frame, .ch-word, .cm-plate, .card, .hero-rise, #carCanvas, .marquee .track, .hv-img { backface-visibility: hidden; }
+.numeros, .marcas, .footer { contain: layout paint; } /* sem contain em seções com filhos fixed (hover da foto) ou sombras grandes */

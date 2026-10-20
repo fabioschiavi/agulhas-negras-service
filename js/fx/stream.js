@@ -69,7 +69,8 @@ export function createStream(canvas, { core = [0.92, 0.97, 1], sheath = [0.45, 0
   for (const n of ["uRes", "uMouse", "uOffset", "uTime", "uMouseOn", "uIntro", "uAngle", "uSpread", "uAlpha", "uFan", "uCore", "uSheath", "uBg"]) U[n] = gl.getUniformLocation(prog, n);
   gl.uniform3fv(U.uCore, core); gl.uniform3fv(U.uSheath, sheath); gl.uniform3fv(U.uBg, bg);
 
-  const DPR = Math.min(devicePixelRatio || 1, mobile ? 1 : 1.5);
+  // glow não precisa de resolução cheia: renderiza a ~55% e o CSS estica (custo de GPU cai ~3x)
+  const DPR = mobile ? 0.5 : Math.min(devicePixelRatio || 1, 2) * 0.55;
   let W = 0, H = 0;
   function resize() {
     W = Math.max(1, Math.round(innerWidth * DPR)); H = Math.max(1, Math.round(innerHeight * DPR));
@@ -92,7 +93,7 @@ export function createStream(canvas, { core = [0.92, 0.97, 1], sheath = [0.45, 0
   function frame(now) {
     if (!running) return;
     requestAnimationFrame(frame);
-    if (paused) return;
+    if (paused || cur.alpha * intro < 0.004 && tgt.alpha * introTgt < 0.004) return;
     const t = (now - t0) / 1000;
     for (const k in tgt) cur[k] += (tgt[k] - cur[k]) * 0.05;
     smx += (mx - smx) * 0.07; smy += (my - smy) * 0.07;
