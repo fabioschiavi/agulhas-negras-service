@@ -54,22 +54,31 @@ export function fanTilt(stage, { max = 7, shift = 18 } = {}) {
 /* ---------------- capítulos: palavras nos cantos sobre a foto (House) ---------------- */
 export function initChapters() {
   const chapters = [...document.querySelectorAll(".chapter")];
-  const parts = chapters.map((c) => ({ c, frame: c.querySelector(".ch-frame"), img: c.querySelector(".ch-frame img"), a: c.querySelector(".ch-a"), b: c.querySelector(".ch-b"), note: c.querySelector(".ch-note") }));
-  function update() {
-    for (const { c, frame, img, a, b, note } of parts) {
-      if (!onScreen(c)) continue;
-      const p = prog(c), m = mobile();
+  const parts = chapters.map((c) => ({ c, frame: c.querySelector(".ch-frame"), a: c.querySelector(".ch-a"), b: c.querySelector(".ch-b"), note: c.querySelector(".ch-note"), top: 0, span: 1, sp: -1, last: "" }));
+  // geometria em cache: nada de medir layout a cada quadro
+  const measure = () => { let y = 0; for (const o of parts) { const r = o.c.getBoundingClientRect(); y = r.top + scrollY; o.top = y; o.span = Math.max(1, o.c.offsetHeight - innerHeight); } };
+  addEventListener("resize", measure); measure();
+  setTimeout(measure, 1500); // depois de fontes e imagens
+  (function loop() {
+    requestAnimationFrame(loop);
+    const y = scrollY, H = innerHeight, m = mobile();
+    for (const o of parts) {
+      if (y + H < o.top - 50 || y > o.top + o.span + H + 50) continue;
+      const raw = clamp((y - o.top) / o.span, -0.3, 1.1);
+      o.sp = o.sp < -0.5 ? raw : o.sp + (raw - o.sp) * 0.22; // suaviza o progresso
+      if (Math.abs(raw - o.sp) < 0.0005) o.sp = raw;
+      const p = o.sp, key = p.toFixed(4);
+      if (key === o.last) continue;
+      o.last = key;
       const inA = ease(seg(p, -0.18, 0.4)), inB = ease(seg(p, -0.06, 0.52)), out = ease(seg(p, 0.8, 0.98));
       const sc = lerp(0.8, 1.04, ease(seg(p, 0, 0.7)));
-      frame.style.transform = `translate(-50%, -50%) scale(${sc})`;
-      frame.style.opacity = 1 - out;
-      img.style.transform = `translateY(${(0.5 - p) * 10}%) scale(1.12)`;
-      a.style.transform = `translateX(${(1 - inA) * -(m ? 30 : 42)}vw)`; a.style.opacity = inA * (1 - out);
-      b.style.transform = `translateX(${(1 - inB) * (m ? 30 : 42)}vw)`; b.style.opacity = inB * (1 - out);
-      note.style.opacity = seg(p, 0.35, 0.5) * (1 - out);
+      o.frame.style.transform = `translate3d(-50%, -50%, 0) scale3d(${sc.toFixed(4)}, ${sc.toFixed(4)}, 1)`;
+      o.frame.style.opacity = (1 - out).toFixed(3);
+      o.a.style.transform = `translate3d(${((1 - inA) * -(m ? 30 : 42)).toFixed(2)}vw, 0, 0)`; o.a.style.opacity = (inA * (1 - out)).toFixed(3);
+      o.b.style.transform = `translate3d(${((1 - inB) * (m ? 30 : 42)).toFixed(2)}vw, 0, 0)`; o.b.style.opacity = (inB * (1 - out)).toFixed(3);
+      o.note.style.opacity = (seg(p, 0.35, 0.5) * (1 - out)).toFixed(3);
     }
-  }
-  addEventListener("scroll", update, { passive: true }); addEventListener("resize", update); update();
+  })();
 }
 
 /* ---------------- camadas explodidas (Artefakt) ---------------- */
@@ -82,9 +91,15 @@ export function initCamadas() {
   // grade acende sob o cursor
   const lat = document.getElementById("lattice");
   lat.addEventListener("pointermove", (e) => { const r = lat.getBoundingClientRect(); lat.style.setProperty("--mx", `${e.clientX - r.left}px`); lat.style.setProperty("--my", `${e.clientY - r.top}px`); }, { passive: true });
+  let sp = -1, lastKey = "";
   function update() {
     if (!onScreen(sec)) return;
-    const p = prog(sec), m = mobile();
+    const raw = prog(sec), m = mobile();
+    sp = sp < 0 ? raw : sp + (raw - sp) * 0.22;
+    if (Math.abs(raw - sp) < 0.0005) sp = raw;
+    const p = sp, key = p.toFixed(4);
+    if (key === lastKey) return;
+    lastKey = key;
     const col = ease(seg(p, COLLAPSE[0], COLLAPSE[1]));
     const lift = m ? 44 : 84;
     let active = 0;
@@ -92,14 +107,14 @@ export function initCamadas() {
       const k = ease(seg(p, RISE[i][0], RISE[i][1]));
       if (k > 0.5) active = i;
       const z = lerp(i * lift * k, i * 14, col);
-      n.style.transform = `translate(-50%, -50%) rotateX(${lerp(60, 48, col)}deg) rotateZ(${lerp(-16, -8, col)}deg) translateZ(${z}px)`;
+      n.style.transform = `translate3d(-50%, -50%, 0) rotateX(${lerp(60, 48, col).toFixed(2)}deg) rotateZ(${lerp(-16, -8, col).toFixed(2)}deg) translateZ(${z.toFixed(1)}px)`;
       n.style.opacity = i === 0 ? 1 : k;
       n.classList.toggle("on", k > 0.6 && col < 0.5);
     });
     if (col > 0.5) active = 3;
     if (active !== last) { last = active; items.forEach((it, i) => it.classList.toggle("on", i === active)); }
   }
-  addEventListener("scroll", update, { passive: true }); addEventListener("resize", update); update();
+  (function loop() { requestAnimationFrame(loop); update(); })();
   window.__camadas = update;
 }
 

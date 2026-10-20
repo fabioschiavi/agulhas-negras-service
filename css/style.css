@@ -443,3 +443,9 @@ main, .footer { position: relative; z-index: 1; }
   .btn-light { box-shadow: none; }
   .ring-arc, .cf-car .zone.on { filter: none; }
 }
+
+/* ---------- capítulos: só o cartão se move (GPU), a foto fica parada dentro dele ---------- */
+.ch-frame { will-change: transform, opacity; transform: translate3d(-50%, -50%, 0) scale3d(.8, .8, 1); box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .9); isolation: isolate; }
+.ch-frame img { transform: none !important; will-change: auto; }
+.ch-frame::after { display: none; }
+.ch-word { will-change: transform, opacity; }

@@ -4,7 +4,7 @@ import { createStream } from "./fx/stream.js?v=4";
 import { liquidReveal } from "./fx/reveal.js?v=1";
 import { carScrub } from "./fx/car.js?v=3";
 import { decode, riseWords, reveals, scrollCounters, onView } from "./fx/text.js?v=1";
-import { tilt, fanTilt, initChapters, initCamadas, initServicos, initOS, initMarcas, initConfigurador, initModal, initNav } from "./sections.js?v=3";
+import { tilt, fanTilt, initChapters, initCamadas, initServicos, initOS, initMarcas, initConfigurador, initModal, initNav } from "./sections.js?v=4";
 
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 scrollTo(0, 0);
